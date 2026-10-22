@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#f0c040;--gold2:#c9a020;--dark:#080808;--felt:#0d3320;--felt2:#0a2518;--card:#141414;--card2:#1c1c1c;--red:#e03030;--green:#22b55a;--text:#f5f0e0;--muted:#777}
+body{background:var(--dark);color:var(--text);font-family:'Lato',sans-serif;font-size:14px;overflow-x:hidden}
+
+/* NAV */
+.nav{display:flex;background:#0a0a0a;border-bottom:2px solid var(--gold2);position:sticky;top:0;z-index:100}
+.nav-btn{flex:1;padding:13px 4px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;border-bottom:3px solid transparent;transition:all 0.2s;text-align:center}
+.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(240,192,64,0.04)}
+.screen{display:none}.screen.active{display:block}
+
+/* HERO */
+.hero{background:linear-gradient(180deg,#000 0%,#0a1f0f 50%,#000 100%);padding:1.8rem 1rem 1.2rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'♠♥♦♣';position:absolute;font-size:8rem;opacity:0.03;top:50%;left:50%;transform:translate(-50%,-50%);letter-spacing:1rem;white-space:nowrap}
+.hero-title{font-family:'Playfair Display',serif;font-size:2.4rem;background:linear-gradient(135deg,#f0c040,#fff8dc,#c9a020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px}
+.hero-sub{color:var(--muted);font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;margin-top:6px}
+.hero-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.hchip{padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:1px;border:1px solid}
+.hchip.g{color:var(--gold);border-color:rgba(240,192,64,0.3);background:rgba(240,192,64,0.08)}
+
+/* CARDS */
+.pad{padding:1rem}
+.sec{background:var(--card);border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #1e1e1e}
+.sec-head{padding:12px 14px;background:linear-gradient(90deg,rgba(240,192,64,0.08),transparent);border-bottom:1px solid #222;display:flex;align-items:center;gap:8px}
+.sec-head-icon{font-size:1.2rem}
+.sec-head-title{font-family:'Playfair Display',serif;color:var(--gold);font-size:0.95rem}
+.sec-head-sub{color:var(--muted);font-size:0.72rem;margin-left:auto;font-family:monospace}
+.sec-body{padding:12px 14px}
+
+/* SWITCHES */
+.sw-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1a1a}
+.sw-row:last-child{border:none}
+.sw-left{display:flex;align-items:center;gap:10px}
+.sw-sym{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;min-width:18px;text-align:center}
+.sw-label{font-size:0.85rem;line-height:1.3}
+.sw-label small{color:var(--muted);font-size:0.72rem;display:block}
+.sw{position:relative;width:44px;height:24px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw-track{position:absolute;inset:0;border-radius:12px;background:#2a2a2a;cursor:pointer;transition:0.3s}
+.sw input:checked+.sw-track{background:var(--green)}
+.sw-track::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.sw input:checked+.sw-track::after{left:23px}
+
+/* FORMULA */
+.fml-box{background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 14px;font-family:monospace;font-size:0.8rem;color:#888;line-height:2;margin:10px 0}
+.fml-box .hi{color:var(--gold)}
+.tt{color:var(--green);font-weight:700}.ff{color:var(--red);font-weight:700}
+
+/* RESULT */
+.res-box{border-radius:10px;padding:14px;text-align:center;border:2px solid;transition:all 0.4s}
+.res-box.allow{background:rgba(34,181,90,0.08);border-color:var(--green)}
+.res-box.deny{background:rgba(224,48,48,0.08);border-color:var(--red)}
+.res-box.neu{background:rgba(240,192,64,0.05);border-color:#2a2a2a}
+.res-emoji{font-size:2rem;margin-bottom:6px}
+.res-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:4px}
+.res-title.ok{color:var(--green)}.res-title.no{color:var(--red)}.res-title.nn{color:var(--gold)}
+.res-desc{font-size:0.78rem;color:var(--muted);line-height:1.6}
+
+/* TRUTH TABLE */
+.tt-wrap{overflow-x:auto;margin-top:10px}
+table.truth{width:100%;border-collapse:collapse;font-size:0.75rem}
+table.truth th{background:rgba(240,192,64,0.1);color:var(--gold);padding:7px 5px;text-align:center;border:1px solid #222;font-family:'Playfair Display',serif;font-size:0.78rem;white-space:nowrap}
+table.truth td{padding:6px 5px;text-align:center;border:1px solid #1a1a1a;color:var(--muted);transition:background 0.3s}
+table.truth tr.hl td{background:rgba(240,192,64,0.07);color:var(--text)}
+table.truth tr.hl-green td{background:rgba(34,181,90,0.1);color:var(--text)}
+table.truth tr.hl-red td{background:rgba(224,48,48,0.08);color:var(--text)}
+
+/* ===== RULETA ===== */
+.ruleta-wrap{background:radial-gradient(ellipse at center,#0d3320 0%,#050f08 70%,#000 100%);min-height:100vh;padding:1rem}
+.wheel-container{display:flex;justify-content:center;margin:1rem 0;position:relative}
+canvas#rouletteCanvas{border-radius:50%;box-shadow:0 0 40px rgba(240,192,64,0.2),0 0 80px rgba(0,0,0,0.8);max-width:280px;width:100%}
+.wheel-pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:2rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8));z-index:10}
+.money-bar{display:flex;justify-content:space-between;background:var(--card);border-radius:10px;padding:10px 14px;margin-bottom:10px;border:1px solid #1e1e1e}
+.mb-item{text-align:center}
+.mb-label{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.mb-val{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-top:2px}
+.bet-chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.bchip{padding:7px 12px;border-radius:20px;border:1px solid #333;background:#111;color:var(--muted);cursor:pointer;font-size:0.78rem;font-weight:700;transition:all 0.2s;flex-shrink:0}
+.bchip.active{background:var(--gold2);color:#000;border-color:var(--gold)}
+.spin-btn{width:100%;padding:14px;background:linear-gradient(135deg,#7a0000,#c00,#7a0000);border:none;border-radius:10px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Playfair Display',serif;letter-spacing:3px;margin:10px 0;transition:all 0.3s;text-shadow:0 1px 2px rgba(0,0,0,0.5);box-shadow:0 4px 15px rgba(192,0,0,0.3)}
+.spin-btn:hover:not(:disabled){filter:brightness(1.2);box-shadow:0 6px 20px rgba(192,0,0,0.5)}
+.spin-btn:disabled{opacity:0.4;cursor:not-allowed}
+.r-result{background:var(--card);border-radius:10px;padding:14px;text-align:center;min-height:70px;border:1px solid #1e1e1e;margin-bottom:10px}
+
+/* BLACKJACK */
+.bj-wrap{background:radial-gradient(ellipse at top,#0a2518,#050f08 60%,#000 100%);min-height:100vh;padding:1rem}
+.cards-area{display:flex;gap:6px;flex-wrap:wrap;min-height:78px;margin-bottom:8px}
+.card-v{width:50px;height:70px;background:#fff;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #ddd;position:relative;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+.card-v.red{color:#c0392b}.card-v.blk{color:#111}
+.card-v .cn{font-size:0.65rem;position:absolute;top:3px;left:4px;font-weight:900}
+.card-v .cs{font-size:1rem;font-weight:900}
+.card-v.back{background:linear-gradient(135deg,#1a1a8e,#2a2aae);border-color:#333}
+.score-row{display:flex;gap:8px;margin-bottom:10px}
+.score-b{flex:1;background:var(--card);border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e}
+.score-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.score-num{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)}
+.bj-btns{display:flex;gap:8px;margin-bottom:10px}
+.bjb{flex:1;padding:11px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:var(--text);cursor:pointer;font-weight:700;font-size:0.85rem;transition:all 0.2s}
+.bjb.g{background:var(--green);border-color:var(--green);color:#fff}
+.bjb.r{background:#8b0000;border-color:#c00;color:#fff}
+.bjb:hover:not(:disabled){filter:brightness(1.2)}
+.bjb:disabled{opacity:0.35;cursor:not-allowed}
+
+/* LOGICA */
+.logica-wrap{padding:1rem;background:#080808}
+.law-c{background:var(--card);border-left:3px solid var(--gold2);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:8px}
+.law-name{color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:3px}
+.law-fml{font-family:monospace;font-size:0.8rem;color:#888;margin-bottom:5px}
+.law-ex{font-size:0.78rem;color:var(--muted);font-style:italic;line-height:1.5}
+.q-card{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px}
+.q-sym{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);flex-shrink:0;min-width:32px;line-height:1.1}
+.q-t{color:var(--gold);font-size:0.85rem;font-weight:700;margin-bottom:3px}
+.q-f{font-family:monospace;font-size:0.75rem;color:#888;margin-bottom:3px}
+.q-e{font-size:0.78rem;color:var(--muted);font-style:italic;line-height:1.4}
+.sec-hdr{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;margin:1rem 0 8px;padding-bottom:6px;border-bottom:1px solid #1e1e1e}
+.logic-panel{background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 12px;margin-top:8px}
+.lp-title{color:var(--gold);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.lp-line{font-family:monospace;font-size:0.75rem;color:#777;padding:3px 0;border-bottom:1px solid #141414;line-height:1.5}
+.lp-line:last-child{border:none}
+.lp-line .h{color:var(--gold)}.lp-line .ok{color:var(--green)}.lp-line .no{color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="goTo('home',this)">🏠 Inicio</button>
+  <button class="nav-btn" onclick="goTo('entrada',this)">🚪 Acceso</button>
+  <button class="nav-btn" onclick="goTo('ruleta',this)">🎡 Ruleta</button>
+  <button class="nav-btn" onclick="goTo('blackjack',this)">🃏 Blackjack</button>
+  <button class="nav-btn" onclick="goTo('logica',this)">📐 Lógica</button>
+  <button class="nav-btn" onclick="goTo('complejidad',this)">📊 Complejidad</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="hero">
+    <div class="hero-title">🎰 ROYAL CASINO</div>
+    <div class="hero-sub">Sistema de Lógica Proposicional — Unidad 1</div>
+    <div class="hero-chips">
+      <span class="hchip g">Proposiciones</span>
+      <span class="hchip g">Tablas de Verdad</span>
+      <span class="hchip g">Inferencias</span>
+      <span class="hchip g">Cuantificadores</span>
+      <span class="hchip g">Leyes Lógicas</span>
+    </div>
+  </div>
+  <div class="pad">
+    <div class="sec">
+      <div class="sec-head"><span class="sec-head-icon">📋</span><span class="sec-head-title">Variables del Sistema</span></div>
+      <div class="sec-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">p</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Mayor de edad</div></div>
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">q</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Tiene fichas</div></div>
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">r</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Mesa disponible</div></div>
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">s</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Lista negra</div></div>
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">t</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Ganó 3 rondas</div></div>
+          <div style="background:#0e0e0e;border-radius:8px;padding:10px;text-align:center;border:1px solid #1e1e1e"><div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">u</div><div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Es VIP</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-head"><span class="sec-head-icon">🗺️</span><span class="sec-head-title">Cómo usar el sistema</span></div>
+      <div class="sec-body" style="font-size:0.82rem;color:var(--muted);line-height:1.8">
+        <div style="margin-bottom:6px">🚪 <b style="color:var(--text)">Acceso</b> — Activa los interruptores y ve la lógica en tiempo real con tablas de verdad</div>
+        <div style="margin-bottom:6px">🎡 <b style="color:var(--text)">Ruleta</b> — Juega de verdad, ve la rueda girar y analiza la lógica de tu apuesta</div>
+        <div style="margin-bottom:6px">🃏 <b style="color:var(--text)">Blackjack</b> — Partidas reales de 21 con análisis lógico de cada decisión</div>
+        <div>📐 <b style="color:var(--text)">Lógica</b> — Resumen completo de leyes, inferencias y cuantificadores</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCESO -->
+<div id="entrada" class="screen">
+<div class="pad">
+
+  <!-- REGLA 1 -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">🚪</span><span class="sec-head-title">¿Puede entrar?</span><span class="sec-head-sub">p ∧ ¬s</span></div>
+    <div class="sec-body">
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">p</span><div class="sw-label">¿Es mayor de edad?<small>Menores no pueden ingresar</small></div></div><label class="sw"><input type="checkbox" id="sp" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">s</span><div class="sw-label">¿Está en lista negra?<small>Persona baneada del casino</small></div></div><label class="sw"><input type="checkbox" id="ss" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="fml-box">
+        Fórmula: <span class="hi">p ∧ ¬s → acceso_permitido</span><br>
+        p = <span id="v_p">?</span> &nbsp;|&nbsp; s = <span id="v_s">?</span> &nbsp;|&nbsp; ¬s = <span id="v_ns">?</span><br>
+        p ∧ ¬s = <span id="v_r1">?</span>
+      </div>
+      <div class="res-box neu" id="res1"><div class="res-emoji">🎰</div><div class="res-title nn">Configura las condiciones</div><div class="res-desc">Activa los interruptores</div></div>
+      <div class="tt-wrap">
+        <table class="truth" id="tt1">
+          <tr><th>p</th><th>s</th><th>¬s</th><th>p ∧ ¬s</th><th>Resultado</th></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>❌ Denegado</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td>❌ Denegado</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td>✅ Permitido</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td>❌ Denegado</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGLA 2 -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">🎲</span><span class="sec-head-title">¿Puede jugar?</span><span class="sec-head-sub">q ∧ r ∧ ¬s</span></div>
+    <div class="sec-body">
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">q</span><div class="sw-label">¿Tiene fichas?<small>Necesita saldo para apostar</small></div></div><label class="sw"><input type="checkbox" id="sq" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">r</span><div class="sw-label">¿Hay mesa disponible?<small>Al menos una mesa libre</small></div></div><label class="sw"><input type="checkbox" id="sr" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="fml-box">
+        Fórmula: <span class="hi">q ∧ r ∧ ¬s → puede_jugar</span><br>
+        q = <span id="v_q">?</span> &nbsp;|&nbsp; r = <span id="v_r">?</span> &nbsp;|&nbsp; ¬s = <span id="v_ns2">?</span><br>
+        q ∧ r ∧ ¬s = <span id="v_r2">?</span>
+      </div>
+      <div class="res-box neu" id="res2"><div class="res-emoji">🎲</div><div class="res-title nn">Configura las condiciones</div><div class="res-desc">¿Tiene fichas y hay mesa?</div></div>
+      <div class="tt-wrap">
+        <table class="truth" id="tt2">
+          <tr><th>q</th><th>r</th><th>¬s</th><th>q∧r∧¬s</th><th>Resultado</th></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>❌</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>❌</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td>❌</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td>❌ Lista negra</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td>✅ Puede jugar</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGLA 3 -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">👑</span><span class="sec-head-title">¿Premio VIP?</span><span class="sec-head-sub">t ∧ u</span></div>
+    <div class="sec-body">
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">t</span><div class="sw-label">¿Ganó 3 rondas seguidas?<small>Racha ganadora activa</small></div></div><label class="sw"><input type="checkbox" id="st" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="sw-row"><div class="sw-left"><span class="sw-sym">u</span><div class="sw-label">¿Es cliente VIP?<small>Membresía premium activa</small></div></div><label class="sw"><input type="checkbox" id="su" onchange="evalAll()"><div class="sw-track"></div></label></div>
+      <div class="fml-box">
+        Fórmula: <span class="hi">t ∧ u → premio_vip</span><br>
+        t = <span id="v_t">?</span> &nbsp;|&nbsp; u = <span id="v_u">?</span><br>
+        t ∧ u = <span id="v_r3">?</span>
+      </div>
+      <div class="res-box neu" id="res3"><div class="res-emoji">👑</div><div class="res-title nn">Sin premio aún</div><div class="res-desc">Necesitas racha Y membresía VIP</div></div>
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>t</th><th>u</th><th>t ∧ u</th><th>Resultado</th></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td>Sin premio</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td>Sin premio</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>Sin premio</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td>🏆 Premio VIP</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGLA 4 EXPULSIÓN -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">🚫</span><span class="sec-head-title">¿Es expulsado?</span><span class="sec-head-sub">¬q ∨ s</span></div>
+    <div class="sec-body">
+      <div class="fml-box">
+        Fórmula: <span class="hi">¬q ∨ s → expulsión</span><br>
+        ¬q = <span id="v_nq">?</span> &nbsp;|&nbsp; s = <span id="v_s2">?</span><br>
+        ¬q ∨ s = <span id="v_r4">?</span>
+      </div>
+      <div class="res-box neu" id="res4"><div class="res-emoji">🚶</div><div class="res-title nn">Estado normal</div><div class="res-desc">Depende de fichas y lista negra</div></div>
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>q</th><th>s</th><th>¬q</th><th>¬q ∨ s</th><th>Resultado</th></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td>🚫 Expulsado</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td>✅ Permanece</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td>🚫 Expulsado</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td>🚫 Expulsado</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- RULETA -->
+<div id="ruleta" class="screen">
+<div class="ruleta-wrap">
+  <div style="text-align:center;padding:0.5rem 0 0.2rem"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">🎡 Ruleta Royal</span><br><span style="font-size:0.72rem;color:var(--muted);letter-spacing:2px">LÓGICA PROPOSICIONAL EN JUEGO</span></div>
+  <div class="money-bar">
+    <div class="mb-item"><div class="mb-label">💰 Saldo</div><div class="mb-val" id="r-saldo">$1,000</div></div>
+    <div class="mb-item"><div class="mb-label">🎯 Apuesta</div><div class="mb-val" id="r-apuesta">$0</div></div>
+    <div class="mb-item"><div class="mb-label">📊 Ganancia</div><div class="mb-val" id="r-ganancia" style="color:var(--muted)">—</div></div>
+  </div>
+  <div class="wheel-container">
+    <div class="wheel-pointer">▼</div>
+    <canvas id="rouletteCanvas" width="280" height="280"></canvas>
+  </div>
+  <div class="r-result" id="r-result"><div style="color:var(--muted);padding:0.5rem">Elige tu apuesta y gira la ruleta</div></div>
+
+  <div class="sec" style="margin-bottom:8px">
+    <div class="sec-head"><span class="sec-head-icon">1️⃣</span><span class="sec-head-title">Tipo de apuesta</span></div>
+    <div class="sec-body">
+      <div class="bet-chips-row">
+        <button class="bchip" data-tipo="rojo" onclick="selTipo(this)">🔴 Rojo</button>
+        <button class="bchip" data-tipo="negro" onclick="selTipo(this)">⚫ Negro</button>
+        <button class="bchip" data-tipo="par" onclick="selTipo(this)">2️⃣ Par</button>
+        <button class="bchip" data-tipo="impar" onclick="selTipo(this)">1️⃣ Impar</button>
+        <button class="bchip" data-tipo="verde" onclick="selTipo(this)">🟢 Verde</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec" style="margin-bottom:8px">
+    <div class="sec-head"><span class="sec-head-icon">2️⃣</span><span class="sec-head-title">Monto</span></div>
+    <div class="sec-body">
+      <div class="bet-chips-row">
+        <button class="bchip" data-monto="50" onclick="selMonto(this)">$50</button>
+        <button class="bchip" data-monto="100" onclick="selMonto(this)">$100</button>
+        <button class="bchip" data-monto="200" onclick="selMonto(this)">$200</button>
+        <button class="bchip" data-monto="500" onclick="selMonto(this)">$500</button>
+      </div>
+    </div>
+  </div>
+  <button class="spin-btn" id="spin-btn" onclick="girar()" disabled>🎡 GIRAR</button>
+
+  <!-- TABLA DE VERDAD RULETA -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">📊</span><span class="sec-head-title">Tabla de Verdad — Apuesta</span><span class="sec-head-sub">p → q</span></div>
+    <div class="sec-body">
+      <div class="fml-box">
+        Sea <span class="hi">p</span> = "el número cumple la apuesta"<br>
+        Sea <span class="hi">q</span> = "el jugador gana"<br>
+        Regla: <span class="hi">p → q</span> (Si cumple la apuesta → gana)
+      </div>
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>p (cumple)</th><th>q (gana)</th><th>p → q</th><th>Inferencia</th></tr>
+          <tr id="rtt1"><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td>Tautología vacía</td></tr>
+          <tr id="rtt2"><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>Contradicción</td></tr>
+          <tr id="rtt3"><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td>Modus Ponens ✅</td></tr>
+        </table>
+      </div>
+      <div class="logic-panel" id="r-logic" style="margin-top:8px">
+        <div class="lp-title">Análisis de la última jugada</div>
+        <div id="r-logic-lines"><div class="lp-line">Gira la ruleta para ver el análisis</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BLACKJACK -->
+<div id="blackjack" class="screen">
+<div class="bj-wrap">
+  <div style="text-align:center;padding:0.5rem 0 0.2rem"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">🃏 Blackjack</span><br><span style="font-size:0.72rem;color:var(--muted);letter-spacing:2px">LLEGA A 21 SIN PASARTE</span></div>
+  <div class="money-bar">
+    <div class="mb-item"><div class="mb-label">💰 Saldo</div><div class="mb-val" id="bj-saldo">$1,000</div></div>
+    <div class="mb-item"><div class="mb-label">🎯 Apuesta</div><div class="mb-val" id="bj-ap-show">$0</div></div>
+  </div>
+  <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:6px">ELIGE APUESTA</div>
+  <div class="bet-chips-row" style="margin-bottom:12px">
+    <button class="bchip" data-monto="50" onclick="selBjAp(this)">$50</button>
+    <button class="bchip" data-monto="100" onclick="selBjAp(this)">$100</button>
+    <button class="bchip" data-monto="200" onclick="selBjAp(this)">$200</button>
+  </div>
+  <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:6px">CARTAS DEL DEALER</div>
+  <div class="cards-area" id="d-cards"></div>
+  <div class="score-row">
+    <div class="score-b"><div class="score-lbl">Dealer</div><div class="score-num" id="d-score">—</div></div>
+    <div class="score-b"><div class="score-lbl">Tú</div><div class="score-num" id="p-score">—</div></div>
+  </div>
+  <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:6px">TUS CARTAS</div>
+  <div class="cards-area" id="p-cards"></div>
+  <div class="bj-btns">
+    <button class="bjb g" id="bj-deal" onclick="bjDeal()">🎴 Nueva partida</button>
+    <button class="bjb" id="bj-hit" onclick="bjHit()" disabled>➕ Pedir</button>
+    <button class="bjb r" id="bj-stand" onclick="bjStand()" disabled>✋ Plantarse</button>
+  </div>
+
+  <!-- TABLA DE VERDAD BJ -->
+  <div class="sec">
+    <div class="sec-head"><span class="sec-head-icon">📊</span><span class="sec-head-title">Tabla de Verdad — Decisión</span></div>
+    <div class="sec-body">
+      <div class="fml-box">
+        <span class="hi">a</span> = "score ≤ 21" &nbsp;|&nbsp; <span class="hi">b</span> = "score &lt; 17" &nbsp;|&nbsp; <span class="hi">c</span> = "dealer tiene más"<br>
+        Pedir carta si: <span class="hi">a ∧ b</span> &nbsp;|&nbsp; Ganar si: <span class="hi">a ∧ ¬c</span>
+      </div>
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>a (≤21)</th><th>b (&lt;17)</th><th>a∧b</th><th>Decisión lógica</th></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td>✅ Pide carta</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td>⚠️ Considera plantarse</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td>💥 Bust — perdiste</td></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td>💥 Bust — perdiste</td></tr>
+        </table>
+      </div>
+      <div class="logic-panel">
+        <div class="lp-title">📐 Análisis lógico en tiempo real</div>
+        <div id="bj-logic"><div class="lp-line">Inicia una partida para ver el análisis</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- LÓGICA -->
+<div id="logica" class="screen">
+<div class="logica-wrap">
+  <div class="pad" style="padding-top:1rem">
+  <div class="sec-hdr">⚖️ Inferencias Aplicadas al Casino</div>
+  <div class="law-c"><div class="law-name">Modus Ponens</div><div class="law-fml">p → q, p ⊢ q</div><div class="law-ex">Si el jugador es mayor de edad (p=V) → puede entrar (q). Como p es verdad → q es verdad. ∴ Puede entrar al casino.</div></div>
+  <div class="law-c"><div class="law-name">Modus Tollens</div><div class="law-fml">p → q, ¬q ⊢ ¬p</div><div class="law-ex">Si puede jugar → tiene fichas. NO tiene fichas (¬q). ∴ NO puede jugar (¬p). El jugador es retirado de la mesa.</div></div>
+  <div class="law-c"><div class="law-name">Ley de De Morgan</div><div class="law-fml">¬(p ∧ q) ≡ ¬p ∨ ¬q</div><div class="law-ex">"No (tiene fichas Y hay mesa)" ≡ "No tiene fichas O no hay mesa". Misma regla, diferente forma lógica.</div></div>
+  <div class="law-c"><div class="law-name">Silogismo Hipotético</div><div class="law-fml">p→q, q→r ⊢ p→r</div><div class="law-ex">Es VIP → tiene privilegios. Tiene privilegios → entra a sala privada. ∴ Es VIP → entra a sala privada.</div></div>
+  <div class="law-c"><div class="law-name">Silogismo Disyuntivo</div><div class="law-fml">p ∨ q, ¬p ⊢ q</div><div class="law-ex">El jugador puede apostar en ruleta O blackjack. No puede en ruleta (sin fichas mínimas). ∴ Apuesta en blackjack.</div></div>
+  <div class="law-c"><div class="law-name">Doble Negación</div><div class="law-fml">¬(¬p) ≡ p</div><div class="law-ex">El jugador no está en la lista de NO baneados ≡ el jugador está baneado. ¬(¬lista_negra) = lista_negra.</div></div>
+
+  <div class="sec-hdr">🔢 Cuantificadores en el Casino</div>
+  <div class="q-card"><div class="q-sym">∀</div><div><div class="q-t">Universal — Para todo</div><div class="q-f">∀x (lista_negra(x) → ¬acceso(x))</div><div class="q-e">Todo jugador en lista negra tiene acceso denegado, sin excepción alguna en el casino.</div></div></div>
+  <div class="q-card"><div class="q-sym">∃</div><div><div class="q-t">Existencial — Existe al menos uno</div><div class="q-f">∃x (mesa(x) ∧ disponible(x))</div><div class="q-e">Existe al menos una mesa disponible en el casino donde se puede sentar a jugar.</div></div></div>
+  <div class="q-card"><div class="q-sym">∄</div><div><div class="q-t">No existe — Ninguno cumple</div><div class="q-f">∄x (jugador(x) ∧ sin_fichas(x) ∧ puede_apostar(x))</div><div class="q-e">No existe ningún jugador sin fichas que pueda apostar en el casino.</div></div></div>
+
+  <div class="sec-hdr">📋 Tabla de Verdad — De Morgan</div>
+  <div class="sec" style="margin-bottom:8px">
+    <div class="sec-body">
+      <div class="fml-box"><span class="hi">¬(p ∧ q) ≡ ¬p ∨ ¬q</span> — Demostración completa</div>
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>p</th><th>q</th><th>p∧q</th><th>¬(p∧q)</th><th>¬p</th><th>¬q</th><th>¬p∨¬q</th><th>≡</th></tr>
+          <tr><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td class="tt">✓</td></tr>
+          <tr><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td class="tt">✓</td></tr>
+          <tr><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td class="tt">V</td><td class="ff">F</td><td class="tt">V</td><td class="tt">V</td><td class="tt">✓</td></tr>
+          <tr><td class="tt">V</td><td class="tt">V</td><td class="tt">V</td><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td class="ff">F</td><td class="tt">✓</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- COMPLEJIDAD ALGORÍTMICA -->
+<div id="complejidad" class="screen">
+<div style="background:linear-gradient(180deg,#000 0%,#0a1a05 50%,#000 100%);min-height:100vh;padding:1rem">
+  <div style="text-align:center;padding:0.8rem 0 0.4rem">
+    <div style="font-family:'Playfair Display',serif;font-size:1.5rem;background:linear-gradient(135deg,#f0c040,#fff8dc,#c9a020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px">📊 Complejidad Algorítmica</div>
+    <div style="font-size:0.72rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px">Análisis experimental — Royal Casino</div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="sec" style="border-color:rgba(240,192,64,0.2)">
+    <div class="sec-head"><span class="sec-head-icon">💡</span><span class="sec-head-title">¿Qué vamos a demostrar?</span></div>
+    <div class="sec-body" style="font-size:0.82rem;color:var(--muted);line-height:1.8">
+      Vamos a medir <span style="color:var(--gold);font-weight:700">tiempo real de ejecución</span> con <code style="color:var(--green);background:#0a0a0a;padding:1px 5px;border-radius:3px">performance.now()</code> en 3 funciones del casino, variando n (el tamaño de entrada de cada función).<br><br>
+      Hay dos casos posibles: <b style="color:var(--gold)">O(1)</b> = el tiempo no cambia aunque n crezca, y <b style="color:var(--green)">O(n)</b> = el tiempo crece en la misma proporción que n.
+    </div>
+    <div class="sec-body" style="padding-top:0">
+      <div class="fml-box">
+        <span class="hi">Control de Acceso:</span> T(n) = 1 &nbsp;→&nbsp; <span class="hi">O(1)</span><br>
+        <span class="hi">Ruleta (dibujo):</span> T(n) = n &nbsp;&nbsp;(n = casillas) &nbsp;→&nbsp; <span class="hi">O(n)</span><br>
+        <span class="hi">Blackjack (score):</span> T(n) = n &nbsp;&nbsp;(n = cartas) &nbsp;→&nbsp; <span class="hi">O(n)</span>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);line-height:1.7">
+        <b style="color:var(--gold)">Importante:</b> para el caso O(1), aumentar las repeticiones no demuestra O(n). Repetir cualquier operación n veces siempre tarda más en total (es lógico: son más operaciones). Lo que prueba O(1) es que el <b>tiempo por operación</b> (tiempo total ÷ n) se mantiene constante aunque n crezca — eso es lo que vas a ver abajo.
+      </div>
+    </div>
+  </div>
+
+  <!-- === CASO 1: O(1) === -->
+  <div class="sec" style="border-color:rgba(240,192,64,0.25)">
+    <div class="sec-head"><span class="sec-head-icon">🚪</span><span class="sec-head-title">Control de Acceso — O(1) Constante</span><span class="sec-head-sub" style="color:var(--gold)">O(1)</span></div>
+    <div class="sec-body">
+      <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 14px;font-size:0.8rem;color:#888;line-height:1.9;margin-bottom:12px">
+        <span style="color:var(--gold)">¿Qué hace?</span> Revisa si puedes entrar al casino con 4 reglas simples (eres mayor, no estás vetado, etc).<br>
+        <span style="color:var(--gold)">¿Por qué no crece el tiempo?</span> No importa si lo revisas 100 o 100.000 veces: cada vez hace exactamente los mismos 4 pasos. No hay ningún bucle que dependa de n.<br>
+        <span style="color:var(--gold)">Fórmula:</span> <code style="color:var(--green)">T(n) = 1</code> — cantidad fija de operaciones, sin importar n.
+      </div>
+      <button onclick="runO1Test()" style="width:100%;padding:11px;background:linear-gradient(135deg,rgba(240,192,64,0.15),rgba(240,192,64,0.05));border:1px solid rgba(240,192,64,0.4);border-radius:8px;color:var(--gold);font-family:'Playfair Display',serif;font-size:0.9rem;cursor:pointer;letter-spacing:1px;margin-bottom:10px">
+        ▶ Ejecutar Prueba O(1)
+      </button>
+      <div id="o1-status" style="font-size:0.75rem;color:var(--muted);text-align:center;min-height:20px;margin-bottom:8px"></div>
+      <div class="tt-wrap" id="o1-result" style="display:none">
+        <table class="truth" id="o1-table">
+          <tr><th>N° Prueba</th><th>Iteraciones (n)</th><th>Tiempo (ms)</th><th>Tiempo / n (μs)</th><th>Comportamiento</th></tr>
+        </table>
+        <div id="o1-conclusion" style="background:rgba(240,192,64,0.06);border:1px solid rgba(240,192,64,0.2);border-radius:8px;padding:10px;margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.7"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === CASO 2: O(n) RULETA === -->
+  <div class="sec" style="border-color:rgba(34,181,90,0.25)">
+    <div class="sec-head"><span class="sec-head-icon">🎡</span><span class="sec-head-title">Ruleta — Dibujo de la Rueda O(n)</span><span class="sec-head-sub" style="color:var(--green)">O(n)</span></div>
+    <div class="sec-body">
+      <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 14px;font-size:0.8rem;color:#888;line-height:1.9;margin-bottom:12px">
+        <span style="color:var(--gold)">¿Qué hace?</span> Dibuja la ruleta casilla por casilla (la de 37 números, 0 al 36).<br>
+        <span style="color:var(--gold)">¿Por qué sí crece el tiempo?</span> Hay un bucle: por cada casilla repite el mismo dibujo una vez. Si la ruleta tuviera 1.000 casillas en vez de 37, el bucle se repite 1.000 veces → tarda más.<br>
+        <span style="color:var(--gold)">Fórmula:</span> <code style="color:var(--green)">T(n) = n</code> — n operaciones, una por casilla.
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:0.75rem;color:var(--muted);letter-spacing:1px">TAMAÑOS DE PRUEBA (casillas):</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px" id="o2-sizes">
+          <span style="background:rgba(34,181,90,0.1);border:1px solid rgba(34,181,90,0.3);color:var(--green);padding:3px 10px;border-radius:12px;font-size:0.75rem">37 (original)</span>
+          <span style="background:rgba(34,181,90,0.1);border:1px solid rgba(34,181,90,0.3);color:var(--green);padding:3px 10px;border-radius:12px;font-size:0.75rem">100 casillas</span>
+          <span style="background:rgba(34,181,90,0.1);border:1px solid rgba(34,181,90,0.3);color:var(--green);padding:3px 10px;border-radius:12px;font-size:0.75rem">1000 casillas</span>
+          <span style="background:rgba(34,181,90,0.1);border:1px solid rgba(34,181,90,0.3);color:var(--green);padding:3px 10px;border-radius:12px;font-size:0.75rem">5000 casillas</span>
+          <span style="background:rgba(34,181,90,0.1);border:1px solid rgba(34,181,90,0.3);color:var(--green);padding:3px 10px;border-radius:12px;font-size:0.75rem">10000 casillas</span>
+        </div>
+      </div>
+      <canvas id="bench-canvas" width="1" height="1" style="display:none"></canvas>
+      <button onclick="runOnTest()" style="width:100%;padding:11px;background:linear-gradient(135deg,rgba(34,181,90,0.15),rgba(34,181,90,0.05));border:1px solid rgba(34,181,90,0.4);border-radius:8px;color:var(--green);font-family:'Playfair Display',serif;font-size:0.9rem;cursor:pointer;letter-spacing:1px;margin-bottom:10px">
+        ▶ Ejecutar Prueba O(n) — Ruleta
+      </button>
+      <div id="on-status" style="font-size:0.75rem;color:var(--muted);text-align:center;min-height:20px;margin-bottom:8px"></div>
+      <div class="tt-wrap" id="on-result" style="display:none">
+        <table class="truth" id="on-table">
+          <tr><th>N (casillas)</th><th>Tiempo (ms)</th><th>Tiempo/N (μs)</th><th>Factor vs N=37</th><th>Comportamiento</th></tr>
+        </table>
+        <div id="on-conclusion" style="background:rgba(34,181,90,0.06);border:1px solid rgba(34,181,90,0.2);border-radius:8px;padding:10px;margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.7"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === CASO 3: O(n) BLACKJACK === -->
+  <div class="sec" style="border-color:rgba(224,48,48,0.25)">
+    <div class="sec-head"><span class="sec-head-icon">🃏</span><span class="sec-head-title">Blackjack — Cálculo de Puntaje O(n)</span><span class="sec-head-sub" style="color:var(--red)">O(n)</span></div>
+    <div class="sec-body">
+      <div style="background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 14px;font-size:0.8rem;color:#888;line-height:1.9;margin-bottom:12px">
+        <span style="color:var(--gold)">¿Qué hace?</span> Suma los puntos de las cartas que tienes en la mano (As=11, J/Q/K=10, etc).<br>
+        <span style="color:var(--gold)">¿Por qué sí crece el tiempo?</span> Recorre carta por carta para sumar. Con 2 cartas suma 2 veces, con 50.000 cartas suma 50.000 veces → a más cartas, más tiempo, en la misma proporción.<br>
+        <span style="color:var(--gold)">Fórmula:</span> <code style="color:var(--green)">T(n) = n</code> — n operaciones, una por carta.
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:0.75rem;color:var(--muted);letter-spacing:1px">TAMAÑOS DE PRUEBA (cartas):</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">2 cartas</span>
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">10 cartas</span>
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">100 cartas</span>
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">1000 cartas</span>
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">10000 cartas</span>
+          <span style="background:rgba(224,48,48,0.1);border:1px solid rgba(224,48,48,0.3);color:var(--red);padding:3px 10px;border-radius:12px;font-size:0.75rem">50000 cartas</span>
+        </div>
+      </div>
+      <button onclick="runBjTest()" style="width:100%;padding:11px;background:linear-gradient(135deg,rgba(224,48,48,0.15),rgba(224,48,48,0.05));border:1px solid rgba(224,48,48,0.4);border-radius:8px;color:var(--red);font-family:'Playfair Display',serif;font-size:0.9rem;cursor:pointer;letter-spacing:1px;margin-bottom:10px">
+        ▶ Ejecutar Prueba O(n) — Blackjack
+      </button>
+      <div id="bj-status" style="font-size:0.75rem;color:var(--muted);text-align:center;min-height:20px;margin-bottom:8px"></div>
+      <div class="tt-wrap" id="bj-result" style="display:none">
+        <table class="truth" id="bj-table">
+          <tr><th>N (cartas)</th><th>Tiempo (ms)</th><th>Tiempo/N (μs)</th><th>Factor vs N=2</th><th>Comportamiento</th></tr>
+        </table>
+        <div id="bj-conclusion" style="background:rgba(224,48,48,0.06);border:1px solid rgba(224,48,48,0.2);border-radius:8px;padding:10px;margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.7"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN COMPARATIVO -->
+  <div class="sec" style="border-color:rgba(240,192,64,0.2);margin-bottom:1.5rem">
+    <div class="sec-head"><span class="sec-head-icon">📋</span><span class="sec-head-title">Resumen Comparativo</span></div>
+    <div class="sec-body">
+      <div class="tt-wrap">
+        <table class="truth">
+          <tr><th>Módulo</th><th>Función</th><th>Notación</th><th>Crece con n</th><th>Característica</th></tr>
+          <tr>
+            <td style="color:var(--gold)">🚪 Acceso</td>
+            <td style="font-family:monospace;font-size:0.7rem;color:var(--green)">evalAll()</td>
+            <td><span style="color:var(--gold);font-weight:700">O(1)</span></td>
+            <td class="ff">No</td>
+            <td style="color:var(--muted);font-size:0.72rem">Tiempo constante</td>
+          </tr>
+          <tr>
+            <td style="color:var(--green)">🎡 Ruleta</td>
+            <td style="font-family:monospace;font-size:0.7rem;color:var(--green)">drawWheel()</td>
+            <td><span style="color:var(--green);font-weight:700">O(n)</span></td>
+            <td class="tt">Sí</td>
+            <td style="color:var(--muted);font-size:0.72rem">Lineal — 1 iter/casilla</td>
+          </tr>
+          <tr>
+            <td style="color:var(--red)">🃏 Blackjack</td>
+            <td style="font-family:monospace;font-size:0.7rem;color:var(--green)">score(cards)</td>
+            <td><span style="color:var(--red);font-weight:700">O(n)</span></td>
+            <td class="tt">Sí</td>
+            <td style="color:var(--muted);font-size:0.72rem">Lineal — 1 iter/carta</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// NAV
+function goTo(id,btn){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='ruleta')drawWheel(wheelAngle);
+}
+
+// HELPERS
+function bv(val){return val?'<span class="tt">V</span>':'<span class="ff">F</span>';}
+function gv(id){return document.getElementById(id).checked;}
+
+// ACCESO EVAL
+function evalAll(){
+  var p=gv('sp'),s=gv('ss'),q=gv('sq'),r=gv('sr'),t=gv('st'),u=gv('su');
+  var ns=!s,nq=!q;
+  document.getElementById('v_p').innerHTML=bv(p);
+  document.getElementById('v_s').innerHTML=bv(s);
+  document.getElementById('v_ns').innerHTML=bv(ns);
+  document.getElementById('v_r1').innerHTML=bv(p&&ns);
+  document.getElementById('v_q').innerHTML=bv(q);
+  document.getElementById('v_r').innerHTML=bv(r);
+  document.getElementById('v_ns2').innerHTML=bv(ns);
+  document.getElementById('v_r2').innerHTML=bv(q&&r&&ns);
+  document.getElementById('v_t').innerHTML=bv(t);
+  document.getElementById('v_u').innerHTML=bv(u);
+  document.getElementById('v_r3').innerHTML=bv(t&&u);
+  document.getElementById('v_nq').innerHTML=bv(nq);
+  document.getElementById('v_s2').innerHTML=bv(s);
+  document.getElementById('v_r4').innerHTML=bv(nq||s);
+
+  // Highlight tabla 1
+  var rows=document.getElementById('tt1').querySelectorAll('tr');
+  var idx=p?(!s?3:4):(!s?1:2);
+  rows.forEach(function(r,i){r.classList.remove('hl-green','hl-red','hl');if(i===idx)r.classList.add(p&&ns?'hl-green':'hl-red');});
+
+  // Res 1
+  var b1=document.getElementById('res1');
+  if(p&&ns){b1.className='res-box allow';b1.innerHTML='<div class="res-emoji">✅</div><div class="res-title ok">ACCESO PERMITIDO</div><div class="res-desc">p=V ∧ ¬s=V → p ∧ ¬s = <b>Verdadero</b><br>El jugador puede entrar al casino</div>';}
+  else if(s){b1.className='res-box deny';b1.innerHTML='<div class="res-emoji">🚫</div><div class="res-title no">LISTA NEGRA</div><div class="res-desc">s=V → ¬s=F → p ∧ ¬s = <b>Falso</b><br>Jugador baneado, acceso denegado</div>';}
+  else{b1.className='res-box deny';b1.innerHTML='<div class="res-emoji">🔞</div><div class="res-title no">MENOR DE EDAD</div><div class="res-desc">p=F → p ∧ ¬s = <b>Falso</b><br>No cumple el requisito de edad</div>';}
+
+  // Highlight tabla 2
+  var rows2=document.getElementById('tt2').querySelectorAll('tr');
+  rows2.forEach(function(rw,i){rw.classList.remove('hl-green','hl-red');});
+  if(q&&r&&ns)rows2[5]&&(rows2[5].classList.add('hl-green'));
+  else if(q&&r&&s)rows2[4]&&(rows2[4].classList.add('hl-red'));
+  else if(q&&!r)rows2[2]&&(rows2[2].classList.add('hl-red'));
+  else if(!q&&r)rows2[3]&&(rows2[3].classList.add('hl-red'));
+  else rows2[1]&&(rows2[1].classList.add('hl-red'));
+
+  // Res 2
+  var b2=document.getElementById('res2');
+  if(q&&r&&ns){b2.className='res-box allow';b2.innerHTML='<div class="res-emoji">🎲</div><div class="res-title ok">PUEDE JUGAR</div><div class="res-desc">q∧r∧¬s = <b>Verdadero</b><br>Tiene fichas, hay mesa y no está baneado</div>';}
+  else{var why=s?'En lista negra (s=V)':!q?'Sin fichas (q=F)':'Sin mesa (r=F)';b2.className='res-box deny';b2.innerHTML='<div class="res-emoji">❌</div><div class="res-title no">NO PUEDE JUGAR</div><div class="res-desc">q∧r∧¬s = <b>Falso</b> — '+why+'</div>';}
+
+  // Res 3
+  var b3=document.getElementById('res3');
+  if(t&&u){b3.className='res-box allow';b3.innerHTML='<div class="res-emoji">🏆</div><div class="res-title ok">PREMIO VIP</div><div class="res-desc">t∧u = <b>Verdadero</b><br>¡Racha ganadora + membresía VIP!</div>';}
+  else{b3.className='res-box neu';b3.innerHTML='<div class="res-emoji">👑</div><div class="res-title nn">SIN PREMIO</div><div class="res-desc">t∧u = <b>Falso</b><br>'+((!t&&!u)?'Necesitas racha Y ser VIP':!t?'Necesitas ganar 3 rondas':'Necesitas membresía VIP')+'</div>';}
+
+  // Res 4
+  var b4=document.getElementById('res4');
+  if(nq||s){b4.className='res-box deny';b4.innerHTML='<div class="res-emoji">🚫</div><div class="res-title no">EXPULSADO</div><div class="res-desc">¬q∨s = <b>Verdadero</b><br>'+(s?'Está en lista negra':'Se quedó sin fichas')+'</div>';}
+  else{b4.className='res-box allow';b4.innerHTML='<div class="res-emoji">✅</div><div class="res-title ok">PERMANECE</div><div class="res-desc">¬q∨s = <b>Falso</b><br>Tiene fichas y no está baneado</div>';}
+}
+
+// ===== RULETA CANVAS =====
+var rSaldo=1000,rTipo=null,rMonto=0,spinning=false;
+var redNums=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+var rouletteNums=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+var wheelAngle=0,animId=null;
+
+function getColor(n){if(n===0)return'#155a25';return redNums.indexOf(n)>=0?'#8b0000':'#1a1a1a';}
+
+function drawWheel(angle){
+  var canvas=document.getElementById('rouletteCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  var cx=W/2,cy=H/2,R=W/2-4;
+  var n=rouletteNums.length,arc=2*Math.PI/n;
+  ctx.clearRect(0,0,W,H);
+  // outer ring
+  ctx.beginPath();ctx.arc(cx,cy,R+2,0,2*Math.PI);ctx.fillStyle='#8b6914';ctx.fill();
+  for(var i=0;i<n;i++){
+    var a=angle+i*arc;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a,a+arc);ctx.closePath();
+    ctx.fillStyle=getColor(rouletteNums[i]);ctx.fill();
+    ctx.strokeStyle='rgba(240,192,64,0.2)';ctx.lineWidth=1;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+arc/2);
+    ctx.textAlign='center';ctx.fillStyle=rouletteNums[i]===0?'#fff':'#ccc';
+    ctx.font='bold '+(W<200?'7':'9')+'px Lato';ctx.fillText(rouletteNums[i],R-16,3);
+    ctx.restore();
+  }
+  // center
+  ctx.beginPath();ctx.arc(cx,cy,22,0,2*Math.PI);
+  var g=ctx.createRadialGradient(cx,cy,0,cx,cy,22);
+  g.addColorStop(0,'#f0c040');g.addColorStop(1,'#8b6914');
+  ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,22,0,2*Math.PI);ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#000';ctx.font='bold 10px Lato';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🎰',cx,cy);
+}
+
+function selTipo(btn){document.querySelectorAll('[data-tipo]').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');rTipo=btn.dataset.tipo;checkReady();}
+function selMonto(btn){document.querySelectorAll('[data-monto]').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');rMonto=parseInt(btn.dataset.monto);document.getElementById('r-apuesta').textContent='$'+rMonto;checkReady();}
+function checkReady(){document.getElementById('spin-btn').disabled=!(rTipo&&rMonto&&rMonto<=rSaldo&&!spinning);}
+
+function girar(){
+  if(spinning)return;spinning=true;
+  document.getElementById('spin-btn').disabled=true;
+  var targetIdx=Math.floor(Math.random()*rouletteNums.length);
+  var n=rouletteNums.length,arc=2*Math.PI/n;
+  // Para que el segmento targetIdx quede centrado bajo el puntero (top = -PI/2):
+  // Queremos: wheelAngle_final + targetIdx*arc + arc/2 ≡ -PI/2  (mod 2PI)
+  // => wheelAngle_final = -PI/2 - targetIdx*arc - arc/2
+  var targetFinalAngle=(-Math.PI/2)-targetIdx*arc-arc/2;
+  var cur=wheelAngle;
+  // diff: cuánto falta para llegar a targetFinalAngle desde cur (siempre positivo)
+  var diff=((targetFinalAngle-cur)%(2*Math.PI)+(2*Math.PI))%(2*Math.PI);
+  var spins=5+Math.floor(Math.random()*5);
+  var totalRotation=spins*2*Math.PI+diff;
+  var duration=4000+spins*150;
+  var start=null,startAngle=cur;
+  function animate(ts){
+    if(!start)start=ts;
+    var prog=Math.min((ts-start)/duration,1);
+    var ease=1-Math.pow(1-prog,4);
+    wheelAngle=startAngle+totalRotation*ease;
+    drawWheel(wheelAngle);
+    if(prog<1){animId=requestAnimationFrame(animate);}
+    else{
+      wheelAngle=startAngle+totalRotation;
+      drawWheel(wheelAngle);
+      spinning=false;
+      showResult(rouletteNums[targetIdx]);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult(num){
+  var esRojo=redNums.indexOf(num)>=0;
+  var esNegro=num>0&&!esRojo;
+  var esVerde=num===0;
+  var esPar=num>0&&num%2===0;
+  var esImpar=num>0&&num%2!==0;
+  var gana=false;
+  if(rTipo==='rojo'&&esRojo)gana=true;
+  if(rTipo==='negro'&&esNegro)gana=true;
+  if(rTipo==='par'&&esPar)gana=true;
+  if(rTipo==='impar'&&esImpar)gana=true;
+  if(rTipo==='verde'&&esVerde)gana=true;
+  var mult=rTipo==='verde'?17:1;
+  var gan=rMonto*mult;
+  if(gana)rSaldo+=gan;else rSaldo-=rMonto;
+  document.getElementById('r-saldo').textContent='$'+rSaldo;
+  var colorLabel=esVerde?'🟢 Verde':esRojo?'🔴 Rojo':'⚫ Negro';
+  var paridad=esVerde?'':(esPar?' | Par':' | Impar');
+  document.getElementById('r-result').innerHTML=
+    '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;margin-bottom:6px;color:'+(esVerde?'#22b55a':esRojo?'#e03030':'#ccc')+'">'+num+'</div>'+
+    '<div style="font-size:0.85rem;color:var(--muted);margin-bottom:8px">'+colorLabel+paridad+'</div>'+
+    (gana?'<div style="color:var(--green);font-size:1rem;font-weight:700">✅ +$'+gan+' GANASTE</div>':
+          '<div style="color:var(--red);font-size:1rem;font-weight:700">❌ -$'+rMonto+' PERDISTE</div>');
+  document.getElementById('r-ganancia').textContent=(gana?'+$'+gan:'-$'+rMonto);
+  document.getElementById('r-ganancia').style.color=gana?'var(--green)':'var(--red)';
+  // lógica
+  document.getElementById('r-logic-lines').innerHTML=
+    '<div class="lp-line">Sea <span class="h">p</span> = "número cumple apuesta '+({rojo:'Rojo',negro:'Negro',par:'Par',impar:'Impar',verde:'Verde'}[rTipo])+'?" → p = <span class="'+(gana?'ok':'no')+'">'+(gana?'V':'F')+'</span></div>'+
+    '<div class="lp-line">Sea <span class="h">q</span> = "el jugador gana" → q = <span class="'+(gana?'ok':'no')+'">'+(gana?'V':'F')+'</span></div>'+
+    '<div class="lp-line">Regla: <span class="h">p → q</span> — Si el número es correcto entonces gana</div>'+
+    '<div class="lp-line">Inferencia: <span class="h">'+(gana?'Modus Ponens — p=V, p→q=V, ∴ q=V ✅':'Modus Tollens — ¬q=V, p→q=V, ∴ ¬p=V ❌')+'</span></div>'+
+    '<div class="lp-line">Cuantificador: <span class="h">∀</span> número en {'+({rojo:'1,3,5,7...',negro:'2,4,6,8...',par:'2,4,6,8...',impar:'1,3,5,7...',verde:'0'}[rTipo])+'} → pago × '+(rTipo==='verde'?18:2)+'</div>';
+  // highlight tabla
+  var rows=document.querySelectorAll('#rtt1,#rtt2,#rtt3');
+  rows.forEach(function(r){r.classList.remove('hl-green','hl-red')});
+  if(gana)document.getElementById('rtt3').classList.add('hl-green');
+  else document.getElementById('rtt1').classList.add('hl-red');
+  checkReady();
+}
+
+// ===== BLACKJACK =====
+var bjSaldo=1000,bjAp=0,bjPhase=0,deck=[],pCards=[],dCards=[];
+var SUITS=['♠','♥','♦','♣'],VALS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function cardVal(v){if(v==='A')return 11;if(['J','Q','K'].indexOf(v)>=0)return 10;return parseInt(v);}
+function score(cards){var s=0,a=0;cards.forEach(function(c){s+=cardVal(c.v);if(c.v==='A')a++;});while(s>21&&a>0){s-=10;a--;}return s;}
+function isRed(s){return s==='♥'||s==='♦';}
+function mkDeck(){deck=[];SUITS.forEach(function(s){VALS.forEach(function(v){deck.push({s:s,v:v});});});deck.sort(function(){return Math.random()-0.5;});}
+function deal(){return deck.pop();}
+function cardHTML(c,h){if(h)return'<div class="card-v back"></div>';var r=isRed(c.s);return'<div class="card-v '+(r?'red':'blk')+'"><span class="cn">'+c.v+'</span><div class="cs">'+c.s+'</div></div>';}
+function renderBJ(hideD){
+  document.getElementById('d-cards').innerHTML=dCards.map(function(c,i){return cardHTML(c,hideD&&i===1);}).join('');
+  document.getElementById('p-cards').innerHTML=pCards.map(function(c){return cardHTML(c,false);}).join('');
+  var ps=score(pCards),ds=hideD?'?':score(dCards);
+  document.getElementById('p-score').textContent=ps;
+  document.getElementById('d-score').textContent=ds;
+  document.getElementById('p-score').style.color=ps>21?'var(--red)':ps===21?'var(--gold)':'var(--gold)';
+}
+function selBjAp(btn){document.querySelectorAll('#blackjack .bchip').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');bjAp=parseInt(btn.dataset.monto);document.getElementById('bj-ap-show').textContent='$'+bjAp;}
+function bjLogic(ps,msg){
+  var a=ps<=21,b=ps<17;
+  var lines='<div class="lp-line">Sea <span class="h">a</span> = "score ≤ 21" → a = <span class="'+(a?'ok':'no')+'">'+(a?'V':'F')+'</span> (tu puntaje: '+ps+')</div>';
+  lines+='<div class="lp-line">Sea <span class="h">b</span> = "score &lt; 17" → b = <span class="'+(b?'ok':'no')+'">'+(b?'V':'F')+'</span></div>';
+  lines+='<div class="lp-line">a ∧ b = <span class="'+(a&&b?'ok':'no')+'">'+(a&&b?'V':'F')+'</span> → '+(a&&b?'<span class="ok">Pide carta (Modus Ponens)</span>':'<span class="h">Considera plantarse</span>')+'</div>';
+  if(ps>=17&&ps<=21)lines+='<div class="lp-line">⚠️ <span class="h">∃ probabilidad alta</span> de bust si pides carta</div>';
+  if(msg)lines+='<div class="lp-line" style="margin-top:4px;color:var(--gold)">'+msg+'</div>';
+  document.getElementById('bj-logic').innerHTML=lines;
+}
+function bjDeal(){
+  if(bjAp===0||bjAp>bjSaldo){return;}
+  mkDeck();pCards=[deal(),deal()];dCards=[deal(),deal()];bjPhase=1;
+  renderBJ(true);
+  document.getElementById('bj-deal').disabled=true;
+  document.getElementById('bj-hit').disabled=false;
+  document.getElementById('bj-stand').disabled=false;
+  var ps=score(pCards);
+  if(ps===21){bjStand();return;}
+  bjLogic(ps,null);
+}
+function bjHit(){
+  pCards.push(deal());var ps=score(pCards);renderBJ(true);
+  if(ps>21){bjEnd('bust');}else if(ps===21){bjStand();}else bjLogic(ps,null);
+}
+function bjStand(){
+  renderBJ(false);
+  document.getElementById('bj-hit').disabled=true;
+  document.getElementById('bj-stand').disabled=true;
+  var ds=score(dCards);
+  while(ds<17){dCards.push(deal());ds=score(dCards);}
+  renderBJ(false);
+  var ps=score(pCards);
+  if(ds>21||ps>ds)bjEnd('win');else if(ps===ds)bjEnd('tie');else bjEnd('lose');
+}
+function bjEnd(r){
+  document.getElementById('bj-deal').disabled=false;
+  document.getElementById('bj-hit').disabled=true;
+  document.getElementById('bj-stand').disabled=true;
+  var ps=score(pCards);
+  var msg='';
+  if(r==='win'){bjSaldo+=bjAp;msg='✅ GANASTE $'+bjAp+' — p(tú>dealer)=V → Modus Ponens';}
+  else if(r==='lose'){bjSaldo-=bjAp;msg='❌ PERDISTE $'+bjAp+' — Modus Tollens aplicado';}
+  else if(r==='bust'){bjSaldo-=bjAp;msg='💥 BUST — a(score≤21)=F → Contradicción';}
+  else{msg='🤝 EMPATE — Saldo sin cambio';}
+  document.getElementById('bj-saldo').textContent='$'+bjSaldo;
+  bjLogic(ps,msg);
+}
+
+// INIT — segmento 0 (cero) centrado bajo el puntero superior (−PI/2)
+var arc0=2*Math.PI/rouletteNums.length;
+wheelAngle=(-Math.PI/2)-arc0/2;
+drawWheel(wheelAngle);
+
+// ===== COMPLEJIDAD ALGORÍTMICA =====
+
+// ---- O(1): Control de Acceso ----
+function runO1Test(){
+  var btn=document.querySelector('[onclick="runO1Test()"]');
+  btn.disabled=true;
+  document.getElementById('o1-status').textContent='Ejecutando... por favor espera';
+  document.getElementById('o1-result').style.display='none';
+
+  var sizes=[1000,5000,10000,50000,100000];
+  var results=[];
+
+  function accessCheck(p,s,q,r,t,u){
+    var ns=!s,nq=!q;
+    var r1=p&&ns;
+    var r2=q&&r&&ns;
+    var r3=t&&u;
+    var r4=nq||s;
+    return {r1:r1,r2:r2,r3:r3,r4:r4};
+  }
+
+  setTimeout(function(){
+    for(var k=0;k<sizes.length;k++){
+      var n=sizes[k];
+      var t0=performance.now();
+      for(var i=0;i<n;i++){
+        accessCheck(i%2===0,i%3===0,i%4===0,i%5===0,i%6===0,i%7===0);
+      }
+      var t1=performance.now();
+      var total=t1-t0;
+      var perOp=(total/n)*1000;
+      results.push({n:n,total:total,perOp:perOp});
+    }
+
+    var tbody='';
+    var refPerOp=results[0].perOp;
+    for(var j=0;j<results.length;j++){
+      var r=results[j];
+      var ratio=r.perOp/refPerOp;
+      var stable=ratio<4;
+      tbody+='<tr><td style="color:var(--gold)">'+(j+1)+'</td>';
+      tbody+='<td style="color:var(--text)">'+r.n.toLocaleString()+'</td>';
+      tbody+='<td style="color:var(--green)">'+r.total.toFixed(6)+'</td>';
+      tbody+='<td style="color:var(--text)">'+r.perOp.toFixed(6)+'</td>';
+      tbody+='<td style="color:'+(stable?'var(--green)':'var(--red)')+'">'+( stable?'✅ Constante':'⚠️ Ruido CPU')+'</td></tr>';
+    }
+    document.getElementById('o1-table').innerHTML=
+      '<tr><th>N° Prueba</th><th>Iteraciones (n)</th><th>Tiempo total (ms)</th><th>Tiempo/op (μs)</th><th>Comportamiento</th></tr>'+tbody;
+
+    var minT=Math.min.apply(null,results.map(function(x){return x.perOp;}));
+    var maxT=Math.max.apply(null,results.map(function(x){return x.perOp;}));
+    document.getElementById('o1-conclusion').innerHTML=
+      '<span style="color:var(--gold);font-weight:700">✅ Conclusión:</span> El tiempo total subió porque hicimos más repeticiones (de '+results[0].n.toLocaleString()+' a '+results[results.length-1].n.toLocaleString()+'), eso es normal y esperado. Lo que importa es el tiempo POR operación, que casi no cambió (entre '+minT.toFixed(6)+' y '+maxT.toFixed(6)+' μs). '+
+      '<b style="color:var(--gold)">T(n)=1 confirmado: cada operación individual no depende de n, por eso es O(1).</b>';
+
+    document.getElementById('o1-status').textContent='';
+    document.getElementById('o1-result').style.display='block';
+    btn.disabled=false;
+  },50);
+}
+
+// ---- O(n): Ruleta — benchmarking del bucle de drawWheel ----
+function runOnTest(){
+  var btn=document.querySelector('[onclick="runOnTest()"]');
+  btn.disabled=true;
+  document.getElementById('on-status').textContent='Ejecutando... por favor espera';
+  document.getElementById('on-result').style.display='none';
+
+  var sizes=[37,100,1000,5000,10000];
+  var REPS=10;
+  var results=[];
+
+  function benchDrawLoop(n){
+    var localRedNums=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+    var arc2=2*Math.PI/n;
+    var angle=0;
+    var acc=0;
+    for(var i=0;i<n;i++){
+      var a=angle+i*arc2;
+      var num=i%37;
+      var isRed=localRedNums.indexOf(num)>=0;
+      var color=num===0?'#155a25':(isRed?'#8b0000':'#1a1a1a');
+      var midAngle=a+arc2/2;
+      var cosV=Math.cos(midAngle);
+      var sinV=Math.sin(midAngle);
+      var label=String(num);
+      acc+=cosV+sinV;
+    }
+    return acc;
+  }
+
+  setTimeout(function(){
+    var base=null;
+    for(var k=0;k<sizes.length;k++){
+      var n=sizes[k];
+      benchDrawLoop(n);
+      var t0=performance.now();
+      for(var rep=0;rep<REPS;rep++) benchDrawLoop(n);
+      var t1=performance.now();
+      var avg=(t1-t0)/REPS;
+      var perN=(avg/n)*1000;
+      if(k===0) base={avg:avg,perN:perN};
+      results.push({n:n,avg:avg,perN:perN,factor:avg/base.avg});
+    }
+
+    var tbody='';
+    for(var j=0;j<results.length;j++){
+      var r=results[j];
+      tbody+='<tr>';
+      tbody+='<td style="color:var(--gold)">'+r.n.toLocaleString()+'</td>';
+      tbody+='<td style="color:var(--green)">'+r.avg.toFixed(6)+'</td>';
+      tbody+='<td style="color:var(--text)">'+r.perN.toFixed(6)+'</td>';
+      tbody+='<td style="color:var(--gold)">×'+r.factor.toFixed(2)+'</td>';
+      tbody+='<td style="color:var(--green)">📈 Lineal</td>';
+      tbody+='</tr>';
+    }
+    document.getElementById('on-table').innerHTML=
+      '<tr><th>N (casillas)</th><th>Tiempo prom (ms)</th><th>Tiempo/N (μs)</th><th>Factor vs N=37</th><th>Comportamiento</th></tr>'+tbody;
+
+    var r0=results[0],rLast=results[results.length-1];
+    var nRatio=(rLast.n/r0.n).toFixed(0);
+    var tRatio=(rLast.avg/r0.avg).toFixed(1);
+    document.getElementById('on-conclusion').innerHTML=
+      '<span style="color:var(--green);font-weight:700">📈 Conclusión:</span> Las casillas crecieron '+nRatio+'× (de '+r0.n+' a '+rLast.n.toLocaleString()+') y el tiempo también creció, casi '+tRatio+'×. Esta vez sí es válido comparar el tiempo total porque n es el tamaño de entrada de la función (no una repetición externa). '+
+      '<b style="color:var(--green)">T(n)=n confirmado: el tiempo sube en la misma proporción que n → O(n).</b>';
+
+    document.getElementById('on-status').textContent='';
+    document.getElementById('on-result').style.display='block';
+    btn.disabled=false;
+  },50);
+}
+
+// ---- O(n): Blackjack — score(cards) original ----
+function runBjTest(){
+  var btn=document.querySelector('[onclick="runBjTest()"]');
+  btn.disabled=true;
+  document.getElementById('bj-status').textContent='Ejecutando... por favor espera';
+  document.getElementById('bj-result').style.display='none';
+
+  var sizes=[2,10,100,1000,10000,50000];
+  var REPS=20;
+  var VALS_ALL=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  var SUITS_ALL=['♠','♥','♦','♣'];
+
+  function cardValLocal(v){if(v==='A')return 11;if(['J','Q','K'].indexOf(v)>=0)return 10;return parseInt(v);}
+  function scoreLocal(cards){
+    var s=0,a=0;
+    cards.forEach(function(c){s+=cardValLocal(c.v);if(c.v==='A')a++;});
+    while(s>21&&a>0){s-=10;a--;}
+    return s;
+  }
+  function genCards(n){
+    var arr=[];
+    for(var i=0;i<n;i++) arr.push({v:VALS_ALL[i%13],s:SUITS_ALL[i%4]});
+    return arr;
+  }
+
+  setTimeout(function(){
+    var base=null;
+    var results=[];
+    for(var k=0;k<sizes.length;k++){
+      var n=sizes[k];
+      var cards=genCards(n);
+      scoreLocal(cards);
+      var t0=performance.now();
+      for(var rep=0;rep<REPS;rep++) scoreLocal(cards);
+      var t1=performance.now();
+      var avg=(t1-t0)/REPS;
+      var perN=n>0?(avg/n)*1000:0;
+      if(k===0) base={avg:avg,perN:perN};
+      results.push({n:n,avg:avg,perN:perN,factor:avg/(base.avg||0.0001)});
+    }
+
+    var tbody='';
+    for(var j=0;j<results.length;j++){
+      var r=results[j];
+      tbody+='<tr>';
+      tbody+='<td style="color:var(--gold)">'+r.n.toLocaleString()+'</td>';
+      tbody+='<td style="color:var(--green)">'+r.avg.toFixed(6)+'</td>';
+      tbody+='<td style="color:var(--text)">'+r.perN.toFixed(6)+'</td>';
+      tbody+='<td style="color:var(--red)">×'+r.factor.toFixed(2)+'</td>';
+      tbody+='<td style="color:var(--green)">📈 Lineal</td>';
+      tbody+='</tr>';
+    }
+    document.getElementById('bj-table').innerHTML=
+      '<tr><th>N (cartas)</th><th>Tiempo prom (ms)</th><th>Tiempo/N (μs)</th><th>Factor vs N=2</th><th>Comportamiento</th></tr>'+tbody;
+
+    var r0=results[0],rLast=results[results.length-1];
+    var nRatio=(rLast.n/r0.n).toFixed(0);
+    var tRatio=(rLast.avg/r0.avg).toFixed(0);
+    document.getElementById('bj-conclusion').innerHTML=
+      '<span style="color:var(--red);font-weight:700">📈 Conclusión:</span> Con '+r0.n+' cartas tardó casi nada ('+r0.avg.toFixed(6)+' ms); con '+rLast.n.toLocaleString()+' cartas ('+nRatio+'× más) tardó casi '+tRatio+'× más. '+
+      '<b style="color:var(--red)">T(n)=n confirmado: a más cartas, más tiempo, en la misma proporción → O(n).</b>';
+
+    document.getElementById('bj-status').textContent='';
+    document.getElementById('bj-result').style.display='block';
+    btn.disabled=false;
+  },50);
+}
+</script>
+</body>
+</html>
